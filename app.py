@@ -6,6 +6,7 @@ from datetime import datetime
 # Set up clean industrial layout configuration
 st.set_page_config(page_title="Alupress Process Control", layout="wide", page_icon="⚙️")
 
+# Injected Custom CSS with the correct Streamlit API parameter
 st.markdown("""
     <style>
     .reportview-container { background: #f8fafc; }
@@ -16,7 +17,7 @@ st.markdown("""
 st.title("🌐 Alupress CY040 Live Process Control Assistant")
 st.caption("Target Component Profile: Cylinder C (OP10 & OP20) // Blueprint Data Spec: 1390_375_038_DES001")
 
-# 1. EXPANDED BLUEPRINT SPECIFICATION MATRIX (10 ITEMS)
+# 1. BLUEPRINT SPECIFICATION MATRIX (10 ITEMS)
 specs = {
     "f25":  {"name": "Item 25 — Y 25 Profile Height", "nom": -7.200, "pTol": 0.150,  "nTol": -0.150, "macro": None,   "inv": False, "type": "height"},
     "f17":  {"name": "Item 17 — // REF Parallelism", "nom": 0.000,  "pTol": 0.300,  "nTol": 0.000,  "macro": None,   "inv": False, "type": "geometry"},
@@ -30,7 +31,7 @@ specs = {
     "f30":  {"name": "Item 30 — Base Thickness Profile", "nom": -8.700, "pTol": 0.100, "nTol": -0.100, "macro": "#853", "inv": False, "type": "axial"}
 }
 
-# 2. INTENT-BASED CALYPSO PDF STRIPPER
+# 2. CALYPSO PDF TEXT EXTRACTOR
 def parse_calypso_pdf(uploaded_file):
     extracted_values = {}
     try:
@@ -96,7 +97,7 @@ with layout_left:
     }
     final_macros = current_macros.copy()
 
-    # DYNAMIC DUAL-SPINDLE CHECK CHECKS
+    # DYNAMIC DUAL-SPINDLE RULES LOGIC
     for key, spec in specs.items():
         sp1_val = st.session_state.cmm_data[key]["sp1"]
         sp2_val = st.session_state.cmm_data[key]["sp2"]
@@ -123,7 +124,7 @@ with layout_left:
                     st.error(f"**🛑 {spec['name']} — TOOL INTERVENTION TRAP**  \n"
                              f"SP1 Dev: `{dev1:+.3f}` | SP2 Dev: `{dev2:+.3f}`  \n"
                              f"⚠️ **CRITICAL STOP:** Spindle 1 is running too wide but Spindle 2 is cutting too small. "
-                             f"**Replace Spindle 2 tool insert insert immediately or check geometric alignment of the carriage chucks.**")
+                             f"**Replace Spindle 2 tool insert immediately or check geometric alignment of the carriage chucks.**")
                 else:
                     st.error(f"**🛑 {spec['name']} — PROCESS CONFLICT**  \n"
                              f"Diverging opposing data values. Check fixture face for nesting chips or mechanical clamp play.")
@@ -178,4 +179,3 @@ O1118(OPTIMIZED ADJUSTMENT SYSTEM BLOCK)
 M99
 %"""
     st.write("#### Fanuc Output Code Console Block")
-    st.code(gcode, language="gcode")
